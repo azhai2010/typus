@@ -20,7 +20,7 @@ module Admin::FormHelper
         when :boolean then         html << typus_boolean_field(key)
         when :date then            html << typus_date_field(key, options)
         when :datetime then        html << typus_datetime_field(key, options)
-        when :file then            html << typus_file_field(key)
+        when :file then            html << typus_template_field(key, 'attachment', options)
         when :password then        html << typus_password_field(key)
         when :selector then        html << typus_selector_field(key)
         when :text then            html << typus_text_field(key)
@@ -90,27 +90,6 @@ module Admin::FormHelper
     <<-HTML
 <li><label for="item_#{attribute}">#{@resource[:class].human_attribute_name(attribute)}</label>
 #{datetime_select :item, attribute, options, {:disabled => attribute_disabled?(attribute)}}</li>
-    HTML
-  end
-
-  # WEI: Added image preview.
-  def typus_file_field(attribute)
-    attribute_display = attribute.split('_file_name').first
-    unless @item.send(attribute).blank?
-      if attachment = @item.send(attribute_display)
-        if (@item.send("#{attribute_display}_content_type") =~ /^image\/.+/) and (attachment.styles.member?(:thumbnail) or attachment.styles.member?(:edit))
-          style = attachment.styles.member?(:thumbnail) ? :thumbnail : :edit
-          preview = image_tag attachment.url(style)
-        else
-          preview = link_to @item.send(attribute), attachment.url
-        end
-      end
-    end
-    <<-HTML
-    <li><label for="item_#{attribute}">#{_(attribute_display.humanize)}</label>
-      #{file_field :item, attribute.split("_file_name").first, :disabled => attribute_disabled?(attribute)}
-      #{preview}
-    </li>
     HTML
   end
 

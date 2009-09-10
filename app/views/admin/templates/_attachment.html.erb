@@ -1,0 +1,47 @@
+<%
+# Shows a preview if the content-type is an image.
+# Has a delete button that handles the case where you click delete and then add another attachment to upload.
+#
+# This template assumes jquery... :-?
+
+delete_attachment_link  = "delete_#{attribute}_link"
+preview_id  = "#{attribute}_preview"
+attachment_file_field = "#{attribute}_file_field"
+attribute_display = attribute.split('_file_name').first
+unless @item.send(attribute).blank?
+  if attachment = @item.send(attribute_display)
+    if (@item.send("#{attribute_display}_content_type") =~ /^image\/.+/) and (attachment.styles.member?(:thumbnail) or attachment.styles.member?(:edit))
+      style = attachment.styles.member?(:thumbnail) ? :thumbnail : :edit
+      preview = image_tag attachment.url(style), :id => preview_id
+    else
+      preview = link_to @item.send(attribute), attachment.url, :id => preview_id
+    end
+  end
+end
+%>
+<% content_for :javascripts do %>
+<script type="text/javascript">
+  $(function() {
+    $("#<%= delete_attachment_link %>").click(function() {
+      $('#<%= preview_id %>').hide();
+      $('#<%= delete_attachment_link %>').hide();
+      $(this).after('<input type="hidden" id="<%= attribute %>_deleter" name="item[<%= attribute %>]" value="">');
+      return false;
+    });
+    $('form').submit(function () {
+      if ($('#<%= attachment_file_field %>').val() != '') {
+        console.log( 'deleting ' + $('#<%= attribute %>_deleter'))
+        $('#<%= attribute %>_deleter').remove();
+      }
+      return true;
+    });
+  })
+  </script>
+<% end %>
+<li><label for="item_<%= attribute %>"><%= _(attribute_display.humanize) %></label>
+  <%= file_field :item, attribute_display, :disabled => attribute_disabled?(attribute), :id => attachment_file_field %>
+  <%= preview %>
+  <% if preview %>
+  <span class="delete" id="<%= delete_attachment_link %>"><a href="#delete">Delete</a></span>
+  <% end %>
+</li>
