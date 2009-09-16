@@ -57,8 +57,10 @@ module Admin::FormHelper
       if related.respond_to?(:roots)
         html << typus_tree_field(related_fk, related.roots, related_fk)
       else
+        #WEI: Changed to use class typus name rather than primary key name
+        #WEI: #{_(related_fk.humanize)}
         html << <<-HTML
-<li><label for="item_#{attribute}">#{_(related_fk.humanize)}
+<li><label for="item_#{attribute}">#{_(related.typus_human_name)}
     <small>#{link_to _("Add"), { :controller => "admin/#{related.class_name.tableize}", :action => 'new', :back_to => back_to, :selected => related_fk }, :confirm => message.join("\n\n") if @current_user.can_perform?(related, 'create')}</small>
     </label>
 #{select :item, related_fk, related.find(:all, :order => related.typus_order_by).collect { |p| [p.typus_name, p.id] }, { :include_blank => true }, { :disabled => attribute_disabled?(attribute) } }</li>
